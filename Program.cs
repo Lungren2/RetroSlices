@@ -1,102 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.IO;
-using System.Threading.Tasks;
-using System.Text.Json;
+using RetroSlices.Classes;
+using RetroSlices.Static;
+using RetroSlices.Methods;
 
 namespace RetroSlices
 {
     internal class Program
     {
-        public enum Menu
-        {
-            CaptureDetails,
-            CheckGameTokenCreditQualification,
-            DisplayCustomerReport,
-            CheckLongTermLoyaltyAward,
-            FindYoungestAndOldestApplicant,
-            CalculateAveragePizzasConsumed,
-            ShowCurrentStats,
-            Exit
-        }
-
-        public class Customer
-        {
-            public string Name { get; set; }
-            public int Age { get; set; }
-            public int HighScoreRank { get; set; }
-            public DateTime StartDate { get; set; }
-            public int PizzasConsumed { get; set; }
-            public int BowlingHighScore { get; set; }
-            public bool IsEmployed { get; set; }
-            public string SlushPuppyPreference { get; set; }
-            public int SlushPuppiesConsumed { get; set; }
-
-            public Customer(string name, int age, int highScoreRank, DateTime startDate, int pizzasConsumed, int bowlingHighScore, bool isEmployed, string slushPuppyPreference, int slushPuppiesConsumed)
-            {
-                Name = name;
-                Age = age;
-                HighScoreRank = highScoreRank;
-                StartDate = startDate;
-                PizzasConsumed = pizzasConsumed;
-                BowlingHighScore = bowlingHighScore;
-                IsEmployed = isEmployed;
-                SlushPuppyPreference = slushPuppyPreference;
-                SlushPuppiesConsumed = slushPuppiesConsumed;
-            }
-        }
-
-        public static List<Customer> CheckQualification(List<Customer> customers, out int qualifiedCount, out int deniedCount)
-        {
-            var qualifiedCustomers = new List<Customer>();
-            qualifiedCount = 0;
-            deniedCount = 0;
-
-            foreach (var customer in customers)
-            {
-                bool isQualified = true;
-
-                if (customer.Age < 18 && !customer.IsEmployed)
-                {
-                    isQualified = false;
-                }
-
-                if ((DateTime.Now - customer.StartDate).TotalDays < 730)
-                {
-                    isQualified = false;
-                }
-
-                if (customer.HighScoreRank <= 2000 && customer.BowlingHighScore <= 1500 && (customer.HighScoreRank + customer.BowlingHighScore) / 2 <= 1200)
-                {
-                    isQualified = false;
-                }
-
-                if ((customer.PizzasConsumed / ((DateTime.Now - customer.StartDate).TotalDays / 30)) < 3)
-                {
-                    isQualified = false;
-                }
-
-                if ((customer.SlushPuppiesConsumed / ((DateTime.Now - customer.StartDate).TotalDays / 30)) <= 4 || customer.SlushPuppyPreference == "Gooey Gulp Galore")
-                {
-                    isQualified = false;
-                }
-
-                if (isQualified)
-                {
-                    qualifiedCustomers.Add(customer);
-                    qualifiedCount++;
-                }
-                else
-                {
-                    deniedCount++;
-                }
-            }
-
-            return qualifiedCustomers;
-        }
 
         public static void DisplayStats(int qualifiedCount, int deniedCount)
         {
@@ -143,37 +56,6 @@ namespace RetroSlices
             return customers;
         }
 
-        public static double CalculateAveragePizzasConsumed(List<Customer> customers)
-        {
-            if (customers.Count == 0) return 0;
-
-            double totalPizzas = customers.Sum(customer => customer.PizzasConsumed);
-            double averagePizzas = totalPizzas / customers.Count;
-
-            return averagePizzas;
-        }
-
-        public static (int, int) GetYoungestAndOldestApplicant(List<Customer> customers)
-        {
-            if (customers.Count == 0) throw new InvalidOperationException("No customers in the list.");
-
-            int youngest = int.MaxValue;
-            int oldest = int.MinValue;
-
-            foreach (var customer in customers)
-            {
-                if (customer.Age < youngest) youngest = customer.Age;
-                if (customer.Age > oldest) oldest = customer.Age;
-            }
-
-            return (youngest, oldest);
-        }
-
-        public static bool CheckLongTermLoyaltyAward(Customer customer)
-        {
-            return (DateTime.Now - customer.StartDate).TotalDays >= 3650; // 10 years in days
-        }
-
         public static void DisplayLoadingEffect(string message, int duration)
         {
             Console.Write(message);
@@ -185,40 +67,11 @@ namespace RetroSlices
             Console.WriteLine();
         }
 
-        public static void DisplayCustomerReport(List<Customer> customers)
-        {
-            Console.WriteLine("Customer Report:");
-            foreach (var customer in customers)
-            {
-                Console.WriteLine($"Name: {customer.Name}, Age: {customer.Age}, High Score Rank: {customer.HighScoreRank}, Start Date: {customer.StartDate.ToShortDateString()}, Pizzas Consumed: {customer.PizzasConsumed}, Bowling High Score: {customer.BowlingHighScore}, Employed: {customer.IsEmployed}, Slush Puppy Preference: {customer.SlushPuppyPreference}, Slush Puppies Consumed: {customer.SlushPuppiesConsumed}");
-            }
-        }
-
-        public static void SaveCustomersToFile(List<Customer> customers, string filePath)
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(customers, options);
-            File.WriteAllText(filePath, jsonString);
-        }
-
-        public static List<Customer> LoadCustomersFromFile(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                return new List<Customer>();
-            }
-
-            string jsonString = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<Customer>>(jsonString);
-        }
-
-
-
 
         public static void Main()
         {
             string filePath = "customers.json";
-            var customers = LoadCustomersFromFile(filePath);
+            var customers = FileService.LoadCustomersFromFile(filePath);
 
             int qualifiedCount = 0;
             int deniedCount = 0;
@@ -242,26 +95,26 @@ namespace RetroSlices
                 {
                     case Menu.CaptureDetails:
                         customers.AddRange(CaptureDetails());
-                        SaveCustomersToFile(customers, filePath);
+                        FileService.SaveCustomersToFile(customers, filePath);
                         break;
                     case Menu.CheckGameTokenCreditQualification:
-                        var qualifiedCustomers = CheckQualification(customers, out qualifiedCount, out deniedCount);
+                        var qualifiedCustomers = CustomerService.CheckQualification(customers, out qualifiedCount, out deniedCount);
                         Console.WriteLine("Qualified Customers:");
                         foreach (var customer in qualifiedCustomers)
                         {
                             Console.WriteLine($"Name: {customer.Name}");
                         }
-                        SaveCustomersToFile(customers, filePath);
+                        FileService.SaveCustomersToFile(customers, filePath);
                         break;
                     case Menu.ShowCurrentStats:
                         DisplayStats(qualifiedCount, deniedCount);
                         break;
                     case Menu.CalculateAveragePizzasConsumed:
-                        double averagePizzas = CalculateAveragePizzasConsumed(customers);
+                        double averagePizzas = CustomerService.CalculateAveragePizzasConsumed(customers);
                         Console.WriteLine($"Average Pizzas Consumed per First Visit: {averagePizzas}");
                         break;
                     case Menu.FindYoungestAndOldestApplicant:
-                        var (youngest, oldest) = GetYoungestAndOldestApplicant(customers);
+                        var (youngest, oldest) = CustomerService.GetYoungestAndOldestApplicant(customers);
                         Console.WriteLine($"Youngest Applicant: {youngest}");
                         Console.WriteLine($"Oldest Applicant: {oldest}");
                         break;
@@ -271,7 +124,7 @@ namespace RetroSlices
                         var customerToCheck = customers.FirstOrDefault(c => c.Name == name);
                         if (customerToCheck != null)
                         {
-                            bool isLoyal = CheckLongTermLoyaltyAward(customerToCheck);
+                            bool isLoyal = CustomerService.CheckLongTermLoyaltyAward(customerToCheck);
                             Console.WriteLine(isLoyal ? "Customer qualifies for long-term loyalty award." : "Customer does not qualify for long-term loyalty award.");
                         }
                         else
@@ -280,11 +133,11 @@ namespace RetroSlices
                         }
                         break;
                     case Menu.DisplayCustomerReport:
-                        DisplayCustomerReport(customers);
+                        CustomerService.DisplayCustomerReport(customers);
                         break;
                     case Menu.Exit:
                         Console.WriteLine("Exiting the program.");
-                        SaveCustomersToFile(customers, filePath);
+                        FileService.SaveCustomersToFile(customers, filePath);
                         return;
                 }
                 DisplayLoadingEffect("Processing", 3000); // 3 seconds loading effect
