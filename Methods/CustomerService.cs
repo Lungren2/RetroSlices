@@ -15,8 +15,9 @@ namespace RetroSlices.Methods
 
             foreach (var customer in customers)
             {
-                //The state of isQualified is true, however if any of the below conditions are truthy it will be set to false, denying the customer
-
+                ///<summary>
+                ///The state of isQualified is true, however if any of the below conditions are truthy it will be set to false, denying the customer
+                ///</summary>
                 bool isQualified = true;
 
                 if (customer.Age < 18 && !customer.IsEmployed)
@@ -44,7 +45,9 @@ namespace RetroSlices.Methods
                     isQualified = false;
                 }
 
-                //Checks to see if the customer is qualified, if so increment qualifiedCount and add the customers data to the collection "qualifiedCustomers" or else increment deniedCound
+                ///<summary>
+                ///Checks to see if the customer is qualified, if so increment qualifiedCount and add the customers data to the collection "qualifiedCustomers" or else increment deniedCound
+                ///</summary>
                 if (isQualified)
                 {
                     qualifiedCustomers.Add(customer);
@@ -56,7 +59,9 @@ namespace RetroSlices.Methods
                 }
             }
 
-            //Return the collection of qualifed customers
+            ///<summary>
+            ///Return the collection of qualifed customers
+            ///</summary>
             return qualifiedCustomers;
         }
 
