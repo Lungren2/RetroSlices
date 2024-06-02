@@ -2,15 +2,18 @@
 
 namespace RetroSlices.Static
 {
+    //The menu items selectable on the console
     public enum Menu
     {
         CaptureDetails,
         CheckGameTokenCreditQualification,
-        DisplayCustomerReport,
-        CheckLongTermLoyaltyAward,
-        FindYoungestAndOldestApplicant,
-        CalculateAveragePizzasConsumed,
         ShowCurrentStats,
+        CalculateAveragePizzasConsumed,
+        FindYoungestAndOldestApplicant,
+        CheckLongTermLoyaltyAward,
+        DisplayCustomerReport,
+        ClearAllData, 
         Exit
     }
+
 }

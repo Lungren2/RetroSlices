@@ -4,10 +4,6 @@
 
 RetroSlice is an entertainment complex featuring an arcade, bowling alley, and pizzeria. This application helps Uncle Rocco Calzone, the owner of RetroSlice, manage and determine the list of loyal customers (Retroslicers) who qualify for game token credits and long-term loyalty awards. The application captures customer details, checks qualification criteria, calculates averages, and displays various statistics.
 
-## Project Description
-
-This project is an introduction to logic programming in C# and aims to create a comprehensive application for managing RetroSlice's loyalty program. The application captures customer details, evaluates their eligibility for game token credits based on specific criteria, and enhances the overall customer experience by adding various features.
-
 ## Features
 
 1. **Capture Customer Details**:
@@ -80,6 +76,28 @@ Build and Run Program.cs
 
 ```bash
   Fn + F5
+```
+
+## File Structure
+
+```bash
+C:.
+├───Classes
+├───Methods
+├───packages
+│   ├───Microsoft.Bcl.AsyncInterfaces.8.0.0
+│   ├───Spectre.Console.0.49.1
+│   ├───Spectre.Console.Cli.0.49.1
+│   ├───System.Buffers.4.5.1
+│   ├───System.Memory.4.5.5
+│   ├───System.Numerics.Vectors.4.5.0
+│   ├───System.Runtime.CompilerServices.Unsafe.6.0.0
+│   ├───System.Text.Encodings.Web.8.0.0
+│   ├───System.Text.Json.8.0.3
+│   ├───System.Threading.Tasks.Extensions.4.5.4
+│   └───System.ValueTuple.4.5.0
+├───Properties
+└───Static
 ```
 
 ## Additional Features

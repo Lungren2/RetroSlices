@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RetroSlices.Methods
 {
@@ -17,6 +15,8 @@ namespace RetroSlices.Methods
 
             foreach (var customer in customers)
             {
+                //The state of isQualified is true, however if any of the below conditions are truthy it will be set to false, denying the customer
+
                 bool isQualified = true;
 
                 if (customer.Age < 18 && !customer.IsEmployed)
@@ -44,6 +44,7 @@ namespace RetroSlices.Methods
                     isQualified = false;
                 }
 
+                //Checks to see if the customer is qualified, if so increment qualifiedCount and add the customers data to the collection "qualifiedCustomers" or else increment deniedCound
                 if (isQualified)
                 {
                     qualifiedCustomers.Add(customer);
@@ -55,6 +56,7 @@ namespace RetroSlices.Methods
                 }
             }
 
+            //Return the collection of qualifed customers
             return qualifiedCustomers;
         }
 
@@ -70,17 +72,27 @@ namespace RetroSlices.Methods
 
         public static (int, int) GetYoungestAndOldestApplicant(List<Customer> customers)
         {
+            // Check if the customers list is empty
+            // If it is, throw an InvalidOperationException
             if (customers.Count == 0) throw new InvalidOperationException("No customers in the list.");
 
+            // Initialize variables to hold the ages of the youngest and oldest customers
+            // Set youngest to the maximum possible integer value
+            // Set oldest to the minimum possible integer value
             int youngest = int.MaxValue;
             int oldest = int.MinValue;
 
+            // Iterate through each customer in the list
             foreach (var customer in customers)
             {
+                // Update youngest if the current customer's age is less than the current youngest
                 if (customer.Age < youngest) youngest = customer.Age;
+
+                // Update oldest if the current customer's age is greater than the current oldest
                 if (customer.Age > oldest) oldest = customer.Age;
             }
 
+            // Return a tuple containing the ages of the youngest and oldest customers
             return (youngest, oldest);
         }
 
@@ -95,6 +107,7 @@ namespace RetroSlices.Methods
 
         public static bool CheckLongTermLoyaltyAward(Customer customer)
         {
+            //Check if the customer has been a member for 10+ years
             return (DateTime.Now - customer.StartDate).TotalDays >= 3650; // 10 years in days
         }
 
