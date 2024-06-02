@@ -76,22 +76,8 @@ namespace RetroSlices
             //This is necessary as when we complete our current task we want to revert back to the main menu to begin a new one
             while (true)
             {
-                //TODO
-                //Make these map to the enum and it's order to avoid mismatches
-                Console.WriteLine("Select an option:");
-                Console.WriteLine("1. Capture Details");
-                Console.WriteLine("2. Check Game Token Credit Qualification");
-                Console.WriteLine("3. Show Current Stats");
-                Console.WriteLine("4. Calculate Average Pizzas Consumed");
-                Console.WriteLine("5. Find Youngest and Oldest Applicant");
-                Console.WriteLine("6. Check Long-term Loyalty Award");
-                Console.WriteLine("7. Display Customer Report");
-                Console.WriteLine("8. Clear All Data");
-                Console.WriteLine("9. Exit");
 
-                //Here we are reading the user's input and setting the selected option based on the enum 
-                int choice = int.Parse(Console.ReadLine());
-                Menu selectedOption = (Menu)(choice - 1);
+                var selectedOption = MenuService.GetMenuChoice();
 
                 //This switch statement takes in the user's selected option
                 //In the case that the user selects Capture Details (number 1) that case will run, as with all the other commands 1-9
