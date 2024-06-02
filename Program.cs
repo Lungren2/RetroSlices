@@ -4,6 +4,8 @@ using System.Linq;
 using RetroSlices.Classes;
 using RetroSlices.Static;
 using RetroSlices.Methods;
+using Spectre.Console;
+using System.Text.RegularExpressions;
 
 namespace RetroSlices
 {
@@ -26,25 +28,117 @@ namespace RetroSlices
 
             while (continueCapturing)
             {
-                Console.WriteLine("Enter Customer Details:");
-                Console.Write("Name: ");
-                string name = Console.ReadLine();
-                Console.Write("Age: ");
-                int age = int.Parse(Console.ReadLine());
-                Console.Write("High Score Rank: ");
-                int highScoreRank = int.Parse(Console.ReadLine());
-                Console.Write("Start Date (yyyy-mm-dd): ");
-                DateTime startDate = DateTime.Parse(Console.ReadLine());
-                Console.Write("Pizzas Consumed: ");
-                int pizzasConsumed = int.Parse(Console.ReadLine());
-                Console.Write("Bowling High Score: ");
-                int bowlingHighScore = int.Parse(Console.ReadLine());
-                Console.Write("Employed (true/false): ");
-                bool isEmployed = bool.Parse(Console.ReadLine());
-                Console.Write("Slush Puppy Preference: ");
-                string slushPuppyPreference = Console.ReadLine();
-                Console.Write("Slush Puppies Consumed: ");
-                int slushPuppiesConsumed = int.Parse(Console.ReadLine());
+                Console.WriteLine("Capture Customer Details:");
+                string name = AnsiConsole.Prompt(new TextPrompt<string>("Customer Name:")
+                    .Validate(customerName =>
+                    {
+                        // Check if the name is not empty and does not contain numbers or punctuation
+                        if (!string.IsNullOrEmpty(customerName) && Regex.IsMatch(customerName, "^[A-Za-z\\s]+$"))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Name! Try Again[/]");
+                        }
+                    }));
+
+                int age = AnsiConsole.Prompt(new TextPrompt<int>("Customer Age:")
+                    .Validate(customerAge =>
+                    {
+                        if (customerAge > 0 && !(customerAge < 0))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Age! Try Again[/]");
+                        }
+                    }));
+
+                int highScoreRank = AnsiConsole.Prompt(new TextPrompt<int>("Customer HighScore Rank:")
+                    .Validate(customerHighScoreRank =>
+                    {
+                        if (customerHighScoreRank > 0 && !(customerHighScoreRank < 0))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid HighScore Rank! Try Again[/]");
+                        }
+                    }));
+
+                DateTime startDate = DateTime.Parse(
+                    AnsiConsole.Prompt(new TextPrompt<string>("Customer Start Date (YYYY-MM-DD):")
+                    .Validate(customerStartDate =>
+                    {
+                        // Check if the name is not empty and does not contain numbers or punctuation
+                        if (!string.IsNullOrEmpty(customerStartDate) && Regex.IsMatch(customerStartDate, @"^\d{4}-\d{2}-\d{2}$"))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Start Date! Try Again[/]");
+                        }
+                    }))
+                    );
+
+                int pizzasConsumed = AnsiConsole.Prompt(new TextPrompt<int>("Pizzas Consumed:")
+                    .Validate(customerPizzasConsumed =>
+                    {
+                        if (customerPizzasConsumed >= 0 && !(customerPizzasConsumed < 0))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Number of Pizzas Consumed! Try Again[/]");
+                        }
+                    }));
+
+                int bowlingHighScore = AnsiConsole.Prompt(new TextPrompt<int>("Customer Bowling Score History:")
+                    .Validate(customerBowlingScore =>
+                    {
+                        if (customerBowlingScore > 0 && !(customerBowlingScore < 0))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Bowling Score History! Try Again[/]");
+                        }
+                    }));
+
+                bool isEmployed = bool.Parse(
+                    AnsiConsole.Prompt(new SelectionPrompt<string>()
+                        .Title("Are you employed?")
+                        .PageSize(10)
+                        .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
+                        .AddChoices(new[] {"true", "false"}))
+                    );
+                Console.WriteLine("Employment Status:",  isEmployed);
+
+                string slushPuppyPreference = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                        .Title("Slush Puppy Preference:")
+                        .PageSize(10)
+                        .MoreChoicesText("[grey](Move up and down to reveal more options)[/]")
+                        .AddChoices(new[] { "Slurp Mix", "Rasberry Red", "Blueberry Blue", "Macha Green", "Strawberry Pink", "Double Orange" }));
+                Console.WriteLine("Slush Puppy Preference:",  slushPuppyPreference);
+
+                int slushPuppiesConsumed = AnsiConsole.Prompt(new TextPrompt<int>("Slushies Consumed:")
+                    .Validate(customerSlushiesConsumed =>
+                    {
+                        if (customerSlushiesConsumed >= 0 && !(customerSlushiesConsumed < 0))
+                        {
+                            return ValidationResult.Success();
+                        }
+                        else
+                        {
+                            return ValidationResult.Error("[red]Invalid Number of Slushies Consumed! Try Again[/]");
+                        }
+                    }));
 
                 //Here we take the input from the user above and save the data object using the Customer class as it's schema
                 //We then add the data object to the Collection
@@ -55,6 +149,10 @@ namespace RetroSlices
                 Console.Write("Do you want to capture more applicants? (Y/N): ");
                 string response = Console.ReadLine();
                 continueCapturing = response.Equals("Y", StringComparison.OrdinalIgnoreCase);
+                if (continueCapturing == false)
+                {
+                    Console.Clear();
+                }
             }
 
             return customers;
