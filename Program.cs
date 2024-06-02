@@ -76,35 +76,23 @@ namespace RetroSlices
             //This is necessary as when we complete our current task we want to revert back to the main menu to begin a new one
             while (true)
             {
-                //TODO
-                //Make these map to the enum and it's order to avoid mismatches
-                Console.WriteLine("Select an option:");
-                Console.WriteLine("1. Capture Details");
-                Console.WriteLine("2. Check Game Token Credit Qualification");
-                Console.WriteLine("3. Show Current Stats");
-                Console.WriteLine("4. Calculate Average Pizzas Consumed");
-                Console.WriteLine("5. Find Youngest and Oldest Applicant");
-                Console.WriteLine("6. Check Long-term Loyalty Award");
-                Console.WriteLine("7. Display Customer Report");
-                Console.WriteLine("8. Clear All Data");
-                Console.WriteLine("9. Exit");
 
-                //Here we are reading the user's input and setting the selected option based on the enum 
-                int choice = int.Parse(Console.ReadLine());
-                Menu selectedOption = (Menu)(choice - 1);
+                var selectedOption = MenuService.GetMenuChoice();
 
                 //This switch statement takes in the user's selected option
                 //In the case that the user selects Capture Details (number 1) that case will run, as with all the other commands 1-9
                 //The "break;" at the end of the case indicates that the switch statement will not continue executing other cases once it returns truthy on that one
                 switch (selectedOption)
                 {
-                    case Menu.CaptureDetails:
+                    case Menu.Capture_Details:
+                        Console.Clear();
                         //Here we use the AddRange method to add the return value of Capture Details to the Collection then use the SaveCustomersToFile() method to save the collection to our JSON object
                         customers.AddRange(CaptureDetails());
                         FileService.SaveCustomersToFile(customers, filePath);
                         break;
 
-                    case Menu.CheckGameTokenCreditQualification:
+                    case Menu.Check_Game_Token_Credit_Qualification:
+                        Console.Clear();
                         //Here we re-assign qualifiedCustomers in order to update it's evaluation since the first time it was ran on application mount
                         qualifiedCustomers = CustomerService.CheckQualification(customers, out qualifiedCount, out deniedCount);
                         //Using the foreach below we indicate which customers are qualified
@@ -116,22 +104,26 @@ namespace RetroSlices
                         FileService.SaveCustomersToFile(customers, filePath);
                         break;
 
-                    case Menu.ShowCurrentStats:
+                    case Menu.Show_Current_Stats:
+                        Console.Clear();
                         DisplayStats(qualifiedCount, deniedCount);
                         break;
 
-                    case Menu.CalculateAveragePizzasConsumed:
+                    case Menu.Calculate_Average_Pizzas_Consumed:
+                        Console.Clear();
                         double averagePizzas = CustomerService.CalculateAveragePizzasConsumed(customers);
                         Console.WriteLine($"Average Pizzas Consumed per First Visit: {averagePizzas}");
                         break;
 
-                    case Menu.FindYoungestAndOldestApplicant:
+                    case Menu.Find_Youngest_And_Oldest_Applicant:
+                        Console.Clear();
                         var (youngest, oldest) = CustomerService.GetYoungestAndOldestApplicant(customers);
                         Console.WriteLine($"Youngest Applicant: {youngest}");
                         Console.WriteLine($"Oldest Applicant: {oldest}");
                         break;
 
-                    case Menu.CheckLongTermLoyaltyAward:
+                    case Menu.Check_Long_Term_Loyalty_Award:
+                        Console.Clear();
                         Console.WriteLine("Enter applicant name to check for loyalty award:");
                         string name = Console.ReadLine();
                         //customerToCheck is set to the first customer with the name specified
@@ -149,12 +141,14 @@ namespace RetroSlices
                         }
                         break;
 
-                    case Menu.DisplayCustomerReport:
+                    case Menu.Display_Customer_Report:
+                        Console.Clear();
                         //Displays the data of all the customers
                         CustomerService.DisplayCustomerReport(customers);
                         break;
 
-                    case Menu.ClearAllData:
+                    case Menu.Clear_All_Data:
+                        Console.Clear();
                         Console.WriteLine("Are you sure you want to clear all data? (Y/N): ");
                         string response = Console.ReadLine();
                         if (response.Equals("Y", StringComparison.OrdinalIgnoreCase))
