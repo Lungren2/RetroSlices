@@ -2,6 +2,7 @@
 
 namespace RetroSlices.Classes
 {
+    //Outlines the data required for a customer profile
     public class Customer
     {
         public string Name { get; set; }
@@ -14,6 +15,7 @@ namespace RetroSlices.Classes
         public string SlushPuppyPreference { get; set; }
         public int SlushPuppiesConsumed { get; set; }
 
+        //A constructor class used to initialize a new customer based on provided details
         public Customer(string name, int age, int highScoreRank, DateTime startDate, int pizzasConsumed, int bowlingHighScore, bool isEmployed, string slushPuppyPreference, int slushPuppiesConsumed)
         {
             Name = name;
