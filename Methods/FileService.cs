@@ -1,31 +1,62 @@
 ﻿using RetroSlices.Classes;
+using Microsoft.AspNetCore.DataProtection;
+using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.IO;
+using System.Text.Json;
 
 namespace RetroSlices.Methods
 {
+    /// <summary>
+    /// Provides methods for saving and loading customer data to/from a file with encryption.
+    /// </summary>
     public static class FileService
     {
-        public static void SaveCustomersToFile(List<Customer> customers, string filePath)
+        private static IDataProtector _protector;
+
+        /// <summary>
+        /// Initializes the FileService class and creates a data protector.
+        /// </summary>
+        static FileService()
         {
-            //serializes the the JSON file using customers as data and options to pretty format the JSON using WriteIndented
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(customers, options);
-            //It then writes the JSON objects to customer.json located in the working directory's bin > Debug, folders
-            File.WriteAllText(filePath, jsonString);
+            // Initialize the data protector with a purpose string (can be any unique identifier)
+            IDataProtectionProvider provider = DataProtectionProvider.Create("RetroSlices.FileProtection");
+            _protector = provider.CreateProtector("RetroSlices.Methods.FileService");
         }
 
+        /// <summary>
+        /// Saves the list of customers to a file with encryption.
+        /// </summary>
+        /// <param name="customers">The list of customers to save.</param>
+        /// <param name="filePath">The file path where the encrypted data will be saved.</param>
+        public static void SaveCustomersToFile(List<Customer> customers, string filePath)
+        {
+            // Serialize the customers list to JSON string
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonString = JsonSerializer.Serialize(customers, options);
+
+            // Encrypt the JSON string and write it to file
+            string protectedData = _protector.Protect(jsonString);
+            File.WriteAllText(filePath, protectedData);
+        }
+
+        /// <summary>
+        /// Loads the list of customers from an encrypted file.
+        /// </summary>
+        /// <param name="filePath">The file path from which to load the encrypted data.</param>
+        /// <returns>The list of customers loaded from the file.</returns>
         public static List<Customer> LoadCustomersFromFile(string filePath)
         {
-            //Checks if customer.json exists in the file path, if not it returns an empty collect which our customers variable in Program.cs is assigned to
             if (!File.Exists(filePath))
             {
                 return new List<Customer>();
             }
 
-            //If it exists it will read from the file and receive the JSON string before deserializing it into a Collection of Customer data sets
-            string jsonString = File.ReadAllText(filePath);
+            // Read protected data from file
+            string protectedData = File.ReadAllText(filePath);
+
+            // Decrypt the data and deserialize JSON string to customers list
+            string jsonString = _protector.Unprotect(protectedData);
             return JsonSerializer.Deserialize<List<Customer>>(jsonString);
         }
     }

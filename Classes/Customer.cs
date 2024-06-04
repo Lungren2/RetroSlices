@@ -20,6 +20,7 @@ namespace RetroSlices.Classes
         /// <summary>
         /// A constructor class used to initialize a new customer based on provided details
         /// </summary>
+        /// <param></param>
         /// <param name="name"></param>
         /// <param name="age"></param>
         /// <param name="highScoreRank"></param>
