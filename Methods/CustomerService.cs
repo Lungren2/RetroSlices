@@ -40,6 +40,8 @@ namespace RetroSlices.Methods
                         }
                     }));
 
+                var existingCustomer = customers.FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
                 int age = AnsiConsole.Prompt(new TextPrompt<int>("Customer Age:")
                     .Validate(customerAge =>
                     {
@@ -138,9 +140,23 @@ namespace RetroSlices.Methods
                     }));
 
                 //Here we take the input from the user above and save the data object using the Customer class as it's schema
-                //We then add the data object to the Collection
-                var customer = new Customer(name, age, highScoreRank, startDate, pizzasConsumed, bowlingHighScore, isEmployed, slushPuppyPreference, slushPuppiesConsumed);
-                customers.Add(customer);
+                //We then add the data object to the Collection if it doesn't already exist in the list
+                if (existingCustomer != null)
+                {
+                    existingCustomer.Age = age;
+                    existingCustomer.HighScoreRank = highScoreRank;
+                    existingCustomer.StartDate = startDate;
+                    existingCustomer.PizzasConsumed = pizzasConsumed;
+                    existingCustomer.BowlingHighScore = bowlingHighScore;
+                    existingCustomer.IsEmployed = isEmployed;
+                    existingCustomer.SlushPuppyPreference = slushPuppyPreference;
+                    existingCustomer.SlushPuppiesConsumed = slushPuppiesConsumed;
+                }
+                else
+                {
+                    var customer = new Customer(name, age, highScoreRank, startDate, pizzasConsumed, bowlingHighScore, isEmployed, slushPuppyPreference, slushPuppiesConsumed);
+                    customers.Add(customer);
+                }
 
                 //We prompt the user to capture more, if Y then continueCapturing stays true and the while loop runs once more
                 Console.Write("Do you want to capture more applicants? (Y/N): ");
@@ -156,18 +172,63 @@ namespace RetroSlices.Methods
         }
 
         /// <summary>
+        /// Retrieves the highest scores and their holders for a given customer name from a list of customers.
+        /// </summary>
+        /// <param name="customers">The list of customers to search.</param>
+        /// <param name="name">The name of the customer to search for.</param>
+        /// <returns>A tuple containing the highest bowling score, the holder of the highest bowling score, the highest arcade score, and the holder of the highest arcade score.</returns>
+        //TODO Seperate into it's own class
+        public static (int IndividualArcadeScore, int IndividualBowlingScore, int BowlingHighScore, string BowlingHighScoreHolder, int ArcadeHighScore, string ArcadeHighScoreHolder) GetHighScores(List<Customer> customers, string name)
+        {
+            // Initialize variables to track highest scores and their holders
+            int highestBowlingScore = 0;
+            string bowlingHighScoreHolder = null;
+            int highestArcadeScore = 0;
+            string arcadeHighScoreHolder = null;
+
+            int IndividualBowlingScore = 0;
+            int IndividualArcadeScore = 0;
+
+            // Loop through customers to find matching name and update highest scores
+            foreach (var customer in customers)
+            {
+
+                if (customer.BowlingHighScore > highestBowlingScore)
+                {
+                    highestBowlingScore = customer.BowlingHighScore;
+                    bowlingHighScoreHolder = customer.Name;
+                }
+
+                if (customer.HighScoreRank > highestArcadeScore)
+                {
+                    highestArcadeScore = customer.HighScoreRank;
+                    arcadeHighScoreHolder = customer.Name;
+                }
+
+                if (customer.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    IndividualBowlingScore = customer.BowlingHighScore;
+                    IndividualArcadeScore = customer.HighScoreRank;
+                }
+
+            }
+
+            // Return the highest scores and their holders
+            return (IndividualArcadeScore, IndividualBowlingScore, highestBowlingScore, bowlingHighScoreHolder, highestArcadeScore, arcadeHighScoreHolder);
+        }
+
+
+        /// <summary>
         /// Checks the qualification of customers based on various criteria.
         /// </summary>
         /// <param name="customers">The list of customers to check.</param>
         /// <param name="qualifiedCount">Output parameter to store the count of qualified customers.</param>
         /// <param name="deniedCount">Output parameter to store the count of denied customers.</param>
         /// <returns>The list of qualified customers.</returns>
-        public static List<Customer> CheckQualification(List<Customer> customers, out int qualifiedCount, out int deniedCount)
+        public static QualificationResult CheckQualification(List<Customer> customers)
         {
             var qualifiedCustomers = new List<Customer>();
-            var unQualifiedCustomers = new List<Customer>();
-            qualifiedCount = 0;
-            deniedCount = 0;
+            var deniedCustomers = new List<Customer>();
 
             foreach (var customer in customers)
             {
@@ -207,17 +268,21 @@ namespace RetroSlices.Methods
                 if (isQualified)
                 {
                     qualifiedCustomers.Add(customer);
-                    qualifiedCount++;
                 }
                 else
                 {
-                    unQualifiedCustomers.Add(customer);
-                    deniedCount++;
+                    deniedCustomers.Add(customer);
                 }
 
             }
 
-            return qualifiedCustomers;
+            return new QualificationResult
+            {
+                QualifiedCustomers = qualifiedCustomers,
+                DeniedCustomers = deniedCustomers,
+                QualifiedCount = qualifiedCustomers.Count,
+                DeniedCount = deniedCustomers.Count
+            };
         }
 
         /// <summary>
@@ -225,15 +290,15 @@ namespace RetroSlices.Methods
         /// </summary>
         /// <param name="customers">The list of customers to calculate the average for.</param>
         /// <returns>The average number of pizzas consumed.</returns>
-        public static double CalculateAveragePizzasConsumed(List<Customer> customers)
-        {
-            if (customers.Count == 0) return 0;
+        // public static double CalculateAveragePizzasConsumed(List<Customer> customers)
+        // {
+        //     if (customers.Count == 0) return 0;
 
-            double totalPizzas = customers.Sum(customer => customer.PizzasConsumed);
-            double averagePizzas = totalPizzas / customers.Count;
+        //     double totalPizzas = customers.Sum(customer => customer.PizzasConsumed);
+        //     double averagePizzas = totalPizzas / customers.Count;
 
-            return averagePizzas;
-        }
+        //     return averagePizzas;
+        // }
 
         //Milestone 2
         /// <summary>
@@ -241,42 +306,42 @@ namespace RetroSlices.Methods
         /// </summary>
         /// <param name="customers">The list of customers to analyze.</param>
         /// <returns>A tuple containing the ages of the youngest and oldest customers.</returns>
-        public static (int, int) GetYoungestAndOldestApplicant(List<Customer> customers)
-        {
-            // Check if the customers list is empty
-            // If it is, throw an InvalidOperationException
-            if (customers.Count == 0) throw new InvalidOperationException("No customers in the list.");
+        // public static (int, int) GetYoungestAndOldestApplicant(List<Customer> customers)
+        // {
+        //     // Check if the customers list is empty
+        //     // If it is, throw an InvalidOperationException
+        //     if (customers.Count == 0) throw new InvalidOperationException("No customers in the list.");
 
-            // Initialize variables to hold the ages of the youngest and oldest customers
-            // Set youngest to the maximum possible integer value
-            // Set oldest to the minimum possible integer value
-            int youngest = int.MaxValue;
-            int oldest = int.MinValue;
+        //     // Initialize variables to hold the ages of the youngest and oldest customers
+        //     // Set youngest to the maximum possible integer value
+        //     // Set oldest to the minimum possible integer value
+        //     int youngest = int.MaxValue;
+        //     int oldest = int.MinValue;
 
-            // Iterate through each customer in the list
-            foreach (var customer in customers)
-            {
-                // Update youngest if the current customer's age is less than the current youngest
-                if (customer.Age < youngest) youngest = customer.Age;
+        //     // Iterate through each customer in the list
+        //     foreach (var customer in customers)
+        //     {
+        //         // Update youngest if the current customer's age is less than the current youngest
+        //         if (customer.Age < youngest) youngest = customer.Age;
 
-                // Update oldest if the current customer's age is greater than the current oldest
-                if (customer.Age > oldest) oldest = customer.Age;
-            }
+        //         // Update oldest if the current customer's age is greater than the current oldest
+        //         if (customer.Age > oldest) oldest = customer.Age;
+        //     }
 
-            // Return a tuple containing the ages of the youngest and oldest customers
-            return (youngest, oldest);
-        }
+        //     // Return a tuple containing the ages of the youngest and oldest customers
+        //     return (youngest, oldest);
+        // }
 
         /// <summary>
         /// Checks if a customer qualifies for a long-term loyalty award.
         /// </summary>
         /// <param name="customer">The customer to check.</param>
         /// <returns>True if the customer qualifies for the award, otherwise false.</returns>
-        public static bool CheckLongTermLoyaltyAward(Customer customer)
-        {
-            //Check if the customer has been a member for at least 3650 days (10 years in days)
-            return (DateTime.Now - customer.StartDate).TotalDays >= 3650;
-        }
+        // public static bool CheckLongTermLoyaltyAward(Customer customer)
+        // {
+        //     //Check if the customer has been a member for at least 3650 days (10 years in days)
+        //     return (DateTime.Now - customer.StartDate).TotalDays >= 3650;
+        // }
 
 
         //Additional Functionality
@@ -284,65 +349,65 @@ namespace RetroSlices.Methods
         /// Displays a customer report in the console.
         /// </summary>
         /// <param name="customers">The list of customers to include in the report.</param>
-        public static void DisplayCustomerReport(List<Customer> customers)
-        {
-            // Create a list to store customer data
-            List<Customer> customerDataList = new List<Customer>();
+        // public static void DisplayCustomerReport(List<Customer> customers)
+        // {
+        //     // Create a list to store customer data
+        //     List<Customer> customerDataList = new List<Customer>();
 
-            // Populate customer data list
-            foreach (var customer in customers)
-            {
-                Customer customerData = new Customer(
-                    customer.Name,
-                     customer.Age,
-                    customer.HighScoreRank,
-                    customer.StartDate,
-                    customer.PizzasConsumed,
-                    customer.BowlingHighScore,
-                    customer.IsEmployed,
-                    customer.SlushPuppyPreference,
-                    customer.SlushPuppiesConsumed
-                 );
+        //     // Populate customer data list
+        //     foreach (var customer in customers)
+        //     {
+        //         Customer customerData = new Customer(
+        //             customer.Name,
+        //              customer.Age,
+        //             customer.HighScoreRank,
+        //             customer.StartDate,
+        //             customer.PizzasConsumed,
+        //             customer.BowlingHighScore,
+        //             customer.IsEmployed,
+        //             customer.SlushPuppyPreference,
+        //             customer.SlushPuppiesConsumed
+        //          );
 
 
 
-                customerDataList.Add(customerData);
-            }
+        //         customerDataList.Add(customerData);
+        //     }
 
-            // Create a table
-            var table = new Table();
+        //     // Create a table
+        //     var table = new Table();
 
-            // Add columns to the table
-            table.HeavyBorder()
-             .AddColumn(new TableColumn("Name").Centered())
-            .AddColumn(new TableColumn("Age").Centered())
-            .AddColumn(new TableColumn("High Score Rank").Centered())
-            .AddColumn(new TableColumn("Start Date").Centered())
-            .AddColumn(new TableColumn("Pizzas Consumed").Centered())
-            .AddColumn(new TableColumn("Bowling High Score").Centered())
-            .AddColumn(new TableColumn("Employment Status").Centered())
-            .AddColumn(new TableColumn("Slush Puppy Preference").Centered())
-            .AddColumn(new TableColumn("Slush Puppies Consumed").Centered());
+        //     // Add columns to the table
+        //     table.HeavyBorder()
+        //      .AddColumn(new TableColumn("Name").Centered())
+        //     .AddColumn(new TableColumn("Age").Centered())
+        //     .AddColumn(new TableColumn("High Score Rank").Centered())
+        //     .AddColumn(new TableColumn("Start Date").Centered())
+        //     .AddColumn(new TableColumn("Pizzas Consumed").Centered())
+        //     .AddColumn(new TableColumn("Bowling High Score").Centered())
+        //     .AddColumn(new TableColumn("Employment Status").Centered())
+        //     .AddColumn(new TableColumn("Slush Puppy Preference").Centered())
+        //     .AddColumn(new TableColumn("Slush Puppies Consumed").Centered());
 
-            // Add rows to the table
-            foreach (var customerData in customerDataList)
-            {
-                table.AddRow(
-                    customerData.Name.ToString(),
-                    customerData.Age.ToString(),
-                    customerData.HighScoreRank.ToString(),
-                    customerData.StartDate.ToShortDateString(),
-                    customerData.PizzasConsumed.ToString(),
-                    customerData.BowlingHighScore.ToString(),
-                    customerData.IsEmployed ? "Employed" : "Unemployed",
-                    customerData.SlushPuppyPreference.ToString(),
-                    customerData.SlushPuppiesConsumed.ToString()
-                );
-            }
+        //     // Add rows to the table
+        //     foreach (var customerData in customerDataList)
+        //     {
+        //         table.AddRow(
+        //             customerData.Name.ToString(),
+        //             customerData.Age.ToString(),
+        //             customerData.HighScoreRank.ToString(),
+        //             customerData.StartDate.ToShortDateString(),
+        //             customerData.PizzasConsumed.ToString(),
+        //             customerData.BowlingHighScore.ToString(),
+        //             customerData.IsEmployed ? "Employed" : "Unemployed",
+        //             customerData.SlushPuppyPreference.ToString(),
+        //             customerData.SlushPuppiesConsumed.ToString()
+        //         );
+        //     }
 
-            // Render the table to the console
-            AnsiConsole.Write(table);
-        }
+        //     // Render the table to the console
+        //     AnsiConsole.Write(table);
+        // }
 
     }
 }
