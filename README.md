@@ -51,12 +51,12 @@ RetroSlice is an entertainment complex featuring an arcade, bowling alley, and p
 | ------------------ | -------------- |
 | Ethan Ogle         | 602114         |
 | Aphiwe Shabalala   | 602517         |
-| Ryno Hartman       | 60229          |
+| Ryno Hartman       | 602296         |
 | Johan Bezuidenhout | 602509         |
 
 ## Demo
 
-Insert gif or link to demo
+![Example](example.png)
 
 ## Run Locally
 
@@ -85,17 +85,6 @@ C:.
 ├───Classes
 ├───Methods
 ├───packages
-│   ├───Microsoft.Bcl.AsyncInterfaces.8.0.0
-│   ├───Spectre.Console.0.49.1
-│   ├───Spectre.Console.Cli.0.49.1
-│   ├───System.Buffers.4.5.1
-│   ├───System.Memory.4.5.5
-│   ├───System.Numerics.Vectors.4.5.0
-│   ├───System.Runtime.CompilerServices.Unsafe.6.0.0
-│   ├───System.Text.Encodings.Web.8.0.0
-│   ├───System.Text.Json.8.0.3
-│   ├───System.Threading.Tasks.Extensions.4.5.4
-│   └───System.ValueTuple.4.5.0
 ├───Properties
 └───Static
 ```

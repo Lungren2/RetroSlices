@@ -59,7 +59,8 @@ namespace RetroSlices
                         Console.Clear();
                         var qualificationResult = CustomerService.CheckQualification(customers);
 
-                        // Display the updated breakdown chart
+                        AnsiConsole.Markup("[bold blue]${qualificationResult.QualifiedCount + qualificationResult.DeniedCount} total applicants[/]");
+                        // Display the total number of qualified and denied applicants
                         AnsiConsole.Write(new BreakdownChart()
                             .Width(60)
                             .AddItem("Qualified Applicants", qualificationResult.QualifiedCount, Color.Green)
